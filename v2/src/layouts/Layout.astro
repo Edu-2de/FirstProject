@@ -1,10 +1,10 @@
 ---
 import { ClientRouter } from 'astro:transitions';
+import '../styles/global.css'; // <--- ADICIONE ESTA LINHA AQUI!
 
 interface Props {
-	title: string;
+    title: string;
 }
-
 const { title } = Astro.props;
 ---
 

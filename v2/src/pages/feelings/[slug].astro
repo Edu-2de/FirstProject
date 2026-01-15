@@ -1,0 +1,46 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+// 1. Gera as rotas estáticas (Build Time)
+export async function getStaticPaths() {
+  const feelings = await getCollection('feelings');
+
+  return feelings.map(entry => ({
+    params: { slug: entry.slug }, // A URL (ex: /feelings/joy)
+    props: { entry }, // Passa o dado inteiro para a página
+  }));
+}
+
+// 2. Pega os dados da página atual
+const { entry } = Astro.props;
+// 3. Renderiza o Markdown para HTML
+const { Content } = await entry.render();
+---
+
+<Layout title={entry.data.title}>
+  <main class={`min-h-screen flex flex-col items-center justify-center p-8 transition-colors duration-700 ${entry.data.bgColor}`}>
+
+    <div class="max-w-2xl w-full">
+      <a href="/" class="text-sm font-bold opacity-50 hover:opacity-100 transition-opacity mb-8 inline-block">
+        &larr; Back to Home
+      </a>
+
+      <h1
+        class={`text-6xl font-black mb-4 ${entry.data.color}`}
+        transition:name={`title-${entry.slug}`}
+      >
+        {entry.data.title}
+      </h1>
+
+      <p class="text-xl opacity-80 mb-12 font-medium">
+        {entry.data.description}
+      </p>
+
+      <article class="prose prose-lg prose-slate">
+        <Content />
+      </article>
+    </div>
+
+  </main>
+</Layout>
