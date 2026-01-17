@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import MoodBoard from "@/components/MoodBoard"; // Importamos o visual que criamos
+import JournalContainer from "@/components/journal/JournalContainer"; 
 
 export default async function Home() {
   // 1. Busca os dados no servidor (Server Side)
@@ -7,6 +7,6 @@ export default async function Home() {
     orderBy: { createdAt: "desc" },
   });
 
-  // 2. Entrega os dados para o componente visual (Client Side)
-  return <MoodBoard initialEntries={entries} />;
+  // 2. Entrega os dados para o novo container organizado
+  return <JournalContainer initialEntries={entries} />;
 }

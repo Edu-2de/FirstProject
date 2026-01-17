@@ -1,38 +1,100 @@
-"use client"; // 👈 Isso avisa o Next.js que aqui teremos interatividade (State)
+"use client";
 
 import { useState } from "react";
-import { createMoodEntry } from "@/app/actions"; // Importamos sua lógica de salvar
-import Image from "next/image"; // Componente otimizado de imagem do Next
+import { createMoodEntry } from "@/server/mood.actions";
 
-// Aqui estão as cores exatas do seu style.css antigo!
+// Ícones SVG minimalistas (Traço fino e elegante)
+const Icons = {
+  Sun: () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+      />
+    </svg>
+  ),
+  Cloud: () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"
+      />
+    </svg>
+  ),
+  Bolt: () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M13 10V3L4 14h7v7l9-11h-7z"
+      />
+    </svg>
+  ),
+  Wave: () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M4 6h16M4 12h16M4 18h16"
+      />
+    </svg>
+  ),
+};
+
+// Configuração refinada (Cores suaves e ícones)
 const MOODS = {
   happy: {
-    label: "Happy",
-    gradient:
-      "linear-gradient(133deg, rgba(255,250,151,1) 0%, rgba(246,224,71,1) 37%, rgba(242,151,23,1) 100%)",
-    textColor: "black", // Texto escuro fica melhor no amarelo
+    label: "Clarity",
+    icon: Icons.Sun,
+    color: "text-amber-600",
+    bgActive: "bg-amber-50 border-amber-200",
   },
   sad: {
-    label: "Sad",
-    gradient:
-      "linear-gradient(52deg, rgba(171,194,255,1) 0%, rgba(71,127,246,1) 37%, rgba(20,44,162,1) 100%)",
-    textColor: "white",
+    label: "Melancholy",
+    icon: Icons.Cloud,
+    color: "text-cyan-600",
+    bgActive: "bg-cyan-50 border-cyan-200",
   },
   angry: {
-    label: "Angry",
-    gradient:
-      "radial-gradient(circle, rgba(255,116,116,1) 0%, rgba(255,110,88,1) 47%, rgba(255,55,0,1) 100%)",
-    textColor: "white",
+    label: "Energy",
+    icon: Icons.Bolt,
+    color: "text-rose-600",
+    bgActive: "bg-rose-50 border-rose-200",
   },
   afraid: {
-    label: "Afraid",
-    gradient:
-      "linear-gradient(300deg, rgb(114, 44, 161) 0%, rgba(158,93,254,1) 58%, rgb(204, 161, 255) 100%)",
-    textColor: "white",
+    label: "Haze",
+    icon: Icons.Wave,
+    color: "text-indigo-600",
+    bgActive: "bg-indigo-50 border-indigo-200",
   },
 };
 
-// Definimos o tipo dos dados que vêm do banco
 type Entry = {
   id: string;
   mood: string;
@@ -45,105 +107,161 @@ export default function MoodBoard({
 }: {
   initialEntries: Entry[];
 }) {
-  // O Estado: Qual humor está selecionado? (null = nenhum, mostra o menu)
   const [selectedMood, setSelectedMood] = useState<string | null>(null);
 
-  // O Design Principal (Fundo verde do seu CSS original)
   return (
-    <div
-      className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden transition-all duration-700"
-      style={{
-        background: selectedMood
-          ? MOODS[selectedMood as keyof typeof MOODS].gradient // Se selecionado, usa a cor do humor
-          : "linear-gradient(287.56deg, #d5ff73 0%, #d9fd83 35%, #a0fdb4 95%)", // Senão, usa o fundo original
-      }}
-    >
-      {/* SE NENHUM HUMOR ESTIVER SELECIONADO: MOSTRA O MENU DE BOLINHAS */}
-      {!selectedMood && (
-        <>
-          <h1 className="text-3xl font-bold mb-10 text-gray-800 z-10">
-            How are you feeling?
-          </h1>
+    <div className="min-h-screen w-full flex items-center justify-center bg-[#f8fafc] text-slate-600 p-8 font-sans selection:bg-cyan-100">
+      {/* Background Sutil (Aura Frutiger) */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[10%] left-[15%] w-150 h-150 bg-cyan-100/40 rounded-full blur-[120px] mix-blend-multiply opacity-70" />
+        <div className="absolute bottom-[10%] right-[15%] w-125 h-125 bg-blue-100/40 rounded-full blur-[100px] mix-blend-multiply opacity-70" />
+      </div>
 
-          <div className="grid grid-cols-2 gap-8 z-10">
-            {Object.entries(MOODS).map(([key, value]) => (
-              <button
-                key={key}
-                onClick={() => setSelectedMood(key)}
-                className="w-32 h-32 rounded-full shadow-lg hover:scale-110 transition-transform duration-300 flex items-center justify-center"
-                style={{ background: value.gradient }}
-              >
-                <span className="font-bold text-lg text-white drop-shadow-md opacity-0 hover:opacity-100 transition-opacity">
-                  {value.label}
-                </span>
-              </button>
-            ))}
+      {/* Main Glass Panel - Mais largo (max-w-6xl) para não ficar apertado */}
+      <div className="w-full max-w-6xl min-h-175 bg-white/70 backdrop-blur-3xl border border-white/60 rounded-4xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] relative z-10 flex flex-col md:flex-row overflow-hidden">
+        {/* SIDEBAR (Menu) */}
+        <aside className="w-full md:w-80 bg-white/40 border-r border-white/50 p-10 flex flex-col gap-10">
+          <div>
+            <h1 className="text-sm font-semibold tracking-[0.2em] uppercase text-slate-400 mb-1">
+              Journal
+            </h1>
+            <p className="text-2xl font-light text-slate-800 tracking-tight">
+              Daily <span className="font-normal text-cyan-600">Flow</span>
+            </p>
           </div>
-        </>
-      )}
 
-      {/* SE UM HUMOR ESTIVER SELECIONADO: MOSTRA O FORMULÁRIO */}
-      {selectedMood && (
-        <div className="z-20 w-full max-w-2xl p-8 bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl animate-in fade-in zoom-in duration-500">
-          {/* Botão de Voltar (Seta) */}
-          <button
-            onClick={() => setSelectedMood(null)}
-            className="mb-6 hover:-translate-x-2 transition-transform"
-          >
-            {/* Certifique-se de ter a imagem arrow.png na pasta public! */}
-            <span className="text-4xl">⬅️</span>
-          </button>
+          <nav className="flex flex-col gap-3">
+            {Object.entries(MOODS).map(([key, value]) => {
+              const Icon = value.icon;
+              const isActive = selectedMood === key;
 
-          <h2
-            className="text-4xl font-bold mb-6"
-            style={{ color: selectedMood === "happy" ? "#d97706" : "#3b82f6" }}
-          >
-            I am {MOODS[selectedMood as keyof typeof MOODS].label}...
-          </h2>
-
-          <form action={createMoodEntry} className="flex flex-col gap-4">
-            {/* Escondemos o input do mood, pois já sabemos qual é pelo estado */}
-            <input type="hidden" name="mood" value={selectedMood} />
-
-            <textarea
-              name="content"
-              placeholder="Why do you feel this way?"
-              className="w-full p-4 rounded-xl border-2 border-gray-200 focus:border-blue-500 outline-none text-lg h-40 resize-none bg-white/50"
-              required
-            />
-
-            <button
-              type="submit"
-              className="py-3 px-6 rounded-xl font-bold text-white shadow-lg transform active:scale-95 transition-all"
-              style={{ background: "black" }}
-            >
-              Save to Diary
-            </button>
-          </form>
-
-          {/* Histórico rápido deste humor */}
-          <div className="mt-10 border-t pt-6">
-            <h3 className="text-xl font-bold mb-4 text-gray-600">
-              Past {selectedMood} moments:
-            </h3>
-            <div className="max-h-40 overflow-y-auto space-y-3">
-              {initialEntries
-                .filter((entry) => entry.mood === selectedMood)
-                .map((entry) => (
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedMood(key)}
+                  className={`
+                    group flex items-center gap-4 px-5 py-4 rounded-2xl transition-all duration-500 ease-out border
+                    ${
+                      isActive
+                        ? `${value.bgActive} shadow-sm translate-x-2`
+                        : "bg-transparent border-transparent hover:bg-white/60 hover:border-white/60"
+                    }
+                  `}
+                >
                   <div
-                    key={entry.id}
-                    className="p-3 bg-white rounded-lg shadow-sm text-sm"
+                    className={`transition-colors duration-300 ${isActive ? value.color : "text-slate-400 group-hover:text-slate-600"}`}
                   >
-                    <p className="text-gray-800">{entry.content}</p>
-                    <span className="text-xs text-gray-400">
-                      {entry.createdAt.toLocaleString()}
+                    <Icon />
+                  </div>
+                  <span
+                    className={`text-sm font-medium tracking-wide transition-colors ${isActive ? "text-slate-700" : "text-slate-500"}`}
+                  >
+                    {value.label}
+                  </span>
+                </button>
+              );
+            })}
+          </nav>
+
+          {/* Histórico Simplificado (Minimalista) */}
+          <div className="mt-auto">
+            <div className="flex items-center gap-2 mb-4 opacity-40">
+              <div className="h-px flex-1 bg-slate-300"></div>
+              <span className="text-[10px] uppercase tracking-widest">
+                History
+              </span>
+              <div className="h-pxflex-1 bg-slate-300"></div>
+            </div>
+
+            <div className="space-y-3 max-h-48 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              {initialEntries.map((entry) => (
+                <div
+                  key={entry.id}
+                  className="group text-xs py-2 border-b border-slate-100 last:border-0 hover:pl-1 transition-all"
+                >
+                  <div className="flex justify-between text-slate-400 mb-1">
+                    <span className="font-medium group-hover:text-cyan-600 transition-colors">
+                      {new Date(entry.createdAt).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </span>
                   </div>
-                ))}
+                  <p className="text-slate-500 line-clamp-1 opacity-70 group-hover:opacity-100">
+                    {entry.content}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      )}
+        </aside>
+
+        {/* ÁREA DE CONTEÚDO (Espaçosa) */}
+        <main className="flex-1 relative bg-white/20 p-12 md:p-20 flex flex-col">
+          {!selectedMood ? (
+            // Estado Vazio (Centralizado e Limpo)
+            <div className="flex-1 flex flex-col items-center justify-center text-center opacity-40 select-none">
+              <div className="w-24 h-24 mb-6 rounded-full border border-slate-300 flex items-center justify-center">
+                <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse"></div>
+              </div>
+              <p className="text-lg font-light tracking-wide text-slate-500">
+                Select a state of mind to focus
+              </p>
+            </div>
+          ) : (
+            // Formulário de Escrita
+            <div className="flex-1 flex flex-col max-w-2xl mx-auto w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
+              <header className="mb-12">
+                <div
+                  className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-4 ${MOODS[selectedMood as keyof typeof MOODS].color} bg-white/50 border border-white`}
+                >
+                  <span>Current State</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-light text-slate-800 tracking-tight">
+                  {MOODS[selectedMood as keyof typeof MOODS].label}
+                </h2>
+              </header>
+
+              <form action={createMoodEntry} className="flex-1 flex flex-col">
+                <input type="hidden" name="mood" value={selectedMood} />
+
+                <textarea
+                  name="content"
+                  placeholder="What is flowing through your mind right now?"
+                  className="
+                    flex-1 w-full bg-transparent border-none outline-none
+                    text-xl md:text-2xl font-light text-slate-600 placeholder:text-slate-300/80
+                    resize-none leading-relaxed p-0 focus:ring-0
+                  "
+                  autoFocus
+                  required
+                />
+
+                <div className="mt-12 flex justify-between items-center pt-8 border-t border-slate-200/50">
+                  <span className="text-xs text-slate-400 font-medium tracking-wider">
+                    {new Date().toLocaleTimeString(undefined, {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+
+                  <button
+                    type="submit"
+                    className="
+                      px-10 py-4 rounded-full bg-slate-900 text-white text-sm font-medium tracking-wide
+                      shadow-xl shadow-slate-200/50
+                      hover:bg-slate-800 hover:scale-[1.02] hover:shadow-2xl
+                      active:scale-95 transition-all duration-300
+                    "
+                  >
+                    Save Entry
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
