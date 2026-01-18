@@ -1,14 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Icons } from "@/components/journal/Icons";
+import type { ComponentType, SVGProps } from "react";
 
 type MoodItem = {
   type: "mood";
   key: string;
   label: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  Icon: any;
+  Icon: ComponentType<SVGProps<SVGSVGElement>>;
   customClass: string;
   imageUrl: string;
 };
@@ -20,21 +20,21 @@ type StickerItem = {
   color: string;
 };
 
-type SealItem = {
-  type: "seal";
+type ArchiveItem = {
+  type: "archive";
   label: string;
   link: string;
   customClass: string;
 };
 
-const SCRAPBOOK_ITEMS: (MoodItem | StickerItem | SealItem)[] = [
+const SCRAPBOOK_ITEMS: (MoodItem | StickerItem | ArchiveItem)[] = [
   {
-    type: "seal",
-    label: "OPEN ARCHIVE",
+    type: "archive",
+    label: "VIEW ARCHIVE →",
     link: "/notebook",
-    customClass: "absolute -top-80 right-[15%] md:right-[18%] z-90 rotate-12",
+    customClass:
+      "absolute -top-12 left-1/2 -translate-x-1/2 z-50 rotate-[-1deg]",
   },
-
   {
     type: "mood",
     key: "happy",
@@ -65,14 +65,12 @@ const SCRAPBOOK_ITEMS: (MoodItem | StickerItem | SealItem)[] = [
       "rotate-[-4deg] -ml-16 translate-y-6 hover:rotate-0 hover:scale-110 hover:z-40 z-30",
     imageUrl: "/moods/angry.jpg",
   },
-
   {
     type: "sticker",
     text: "Energy cannot be destroyed.",
     color: "bg-rose-100",
     customClass: "rotate-[-6deg] -ml-12 -mt-24 z-50 w-36 h-36 shadow-md",
   },
-
   {
     type: "mood",
     key: "afraid",
@@ -116,7 +114,7 @@ export default async function Home() {
       </header>
 
       <main className="min-h-screen flex flex-col items-center justify-center pb-32 pt-10 relative">
-        <div className="mb-10 text-center max-w-3xl px-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="mb-16 text-center max-w-3xl px-6 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <h1 className="text-6xl md:text-8xl font-thin text-slate-900 tracking-tighter mb-4 leading-[0.9] drop-shadow-sm">
             Current <br />
             <span className="font-serif italic font-normal text-slate-700">
@@ -125,33 +123,35 @@ export default async function Home() {
           </h1>
         </div>
 
-        <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-4xl px-4 md:gap-0 gap-12 perspective-1000 mt-10">
+        <div className="relative flex flex-col lg:flex-row items-center justify-center w-full max-w-4xl px-4 md:gap-0 gap-12 perspective-1000 mt-5">
           {SCRAPBOOK_ITEMS.map((item, index) => {
-            if (item.type === "seal") {
+            if (item.type === "archive") {
               return (
                 <Link
                   href={item.link}
-                  key={`seal-${index}`}
+                  key={`archive-${index}`}
                   className={`group ${item.customClass}`}
                 >
-                  <div className="relative w-36 h-36 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-12">
-                    <div className="absolute inset-0 bg-red-900 rounded-full shadow-2xl shadow-red-900/30 border-[6px] border-red-800/80"></div>
-
-                    <div className="absolute inset-3 border-2 border-red-950/20 rounded-full border-dashed opacity-70"></div>
-
-                    <div className="relative z-10 text-center flex flex-col items-center justify-center h-full pb-1">
-                      <span className="text-[0.65rem] font-bold tracking-[0.2em] text-red-200 uppercase opacity-90 mb-1">
-                        Private
-                      </span>
-                      <span className="font-serif font-black text-red-50 text-xl tracking-widest drop-shadow-md border-t border-b border-red-400/30 py-1 my-1">
-                        ARCHIVE
-                      </span>
-                      <span className="text-[0.5rem] mt-1 text-red-300 opacity-70 uppercase tracking-widest">
-                        Est. 2024
+                  <div className="relative flex items-center justify-center transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3">
+                    <div className="bg-slate-900 text-slate-50 px-5 py-2 rounded-xs shadow-sm shadow-black/20 border border-slate-800 flex items-center gap-3">
+                      <svg
+                        className="w-3 h-3 text-slate-400"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                        />
+                      </svg>
+                      <span className="font-mono text-xs tracking-[0.2em] font-bold uppercase">
+                        {item.label}
                       </span>
                     </div>
-
-                    <div className="absolute top-6 left-6 w-12 h-6 bg-linear-to-br from-white/20 to-transparent rounded-full rotate-45 blur-[1px]"></div>
+                    <div className="absolute inset-0 bg-linear-to-b from-white/10 to-transparent pointer-events-none rounded-xs"></div>
                   </div>
                 </Link>
               );
